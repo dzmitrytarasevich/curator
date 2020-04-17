@@ -1,0 +1,316 @@
+version: '3.2'
+services:
+  curator:
+    image: bitnami/elasticsearch-curator:5
+    container_name: curator
+    logging:
+      driver: json-file
+    restart: on-failure
+    environment:
+      ELASTICSEARCH_HOST: elasticsearch1
+      CRON: 0 * * * *
+#      CONFIG_FILE: /etc/curator/config.yml
+#      ACTION_FILE: /etc/curator/actions/allocate_and_delete.yml
+      UNIT_COUNT: 2
+    command: ["--config=/etc/curator/curator.yml", "/etc/curator/actions/allocate_and_delete.yml"]
+    volumes:
+      - "./:/etc/curator:ro"
+    networks:
+      - elasticsearch
+    depends_on:
+      - elasticsearch1
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: elasticsearch1
+    logging:
+      driver: json-file
+    restart: on-failure
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - ./elastic:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - "cluster.name=es-cluster"
+      - "node.name=master"
+#      - path.data=/var/lib/elasticsearch
+#      - path.log=/var/log/elasticsearch
+      - "network.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "node.master=true"
+      - "node.data=false"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+#      - discovery.zen.minimum_master_nodes=1
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: elasticsearch2
+    logging:
+      driver: json-file
+    restart: on-failure
+    environment:
+      - "cluster.name=es-cluster"
+      - "node.name=data-fast"
+#      - path.data=/var/lib/elasticsearch
+#      - path.log=/var/log/elasticsearch
+      - "network.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "node.master=false"
+      - "node.data=true"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+#      - discovery.zen.minimum_master_nodes=1
+      - "node.attr.speed=fast"
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - ./elastic:/usr/share/elasticsearch/data
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  elasticsearch3:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: elasticsearch3
+    logging:
+      driver: json-file
+    restart: on-failure
+    environment:
+      - "cluster.name=es-cluster"
+      - "node.name=data-slow"
+#      - path.data=/var/lib/elasticsearch
+#      - path.log=/var/log/elasticsearch
+      - "network.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "node.master=false"
+      - "node.data=true"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+#      - discovery.zen.minimum_master_nodes=1
+      - "node.attr.speed=slow"
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - ./elastic:/usr/share/elasticsearch/data
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  elasticsearch4:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: elasticsearch4
+    logging:
+      driver: json-file
+    restart: on-failure
+    environment:
+      - "cluster.name=es-cluster"
+      - "node.name=data-slow-2"
+#      - path.data=/var/lib/elasticsearch
+#      - path.log=/var/log/elasticsearch
+      - "network.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "node.master=false"
+      - "node.data=true"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+#      - discovery.zen.minimum_master_nodes=1
+      - "node.attr.speed=slow"
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - ./elastic:/usr/share/elasticsearch/data
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.7.1
+    user: root
+    restart: on-failure
+    container_name: filebeat
+    environment:
+       - "node.name=filebeat"
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - elasticsearch
+    depends_on:
+      - kibana
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:6.7.1
+    user: root
+    restart: on-failure
+    container_name: metricbeat
+    volumes:
+      - ./metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - elasticsearch
+    depends_on:
+      - elasticsearch1
+      - kibana
+    environment:
+      - "node.name=metricbeat"
+      - "ELASTICSEARCH_URL=http://elasticsearch1:9200/"
+    command:
+      - "-system.hostfs=/hostfs"
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:6.7.1
+    restart: on-failure
+    container_name: apm-server
+    networks:
+      - elasticsearch
+    environment:
+      - "node.name=apm-server"
+    depends_on:
+      - elasticsearch1
+      - kibana
+    ports:
+      - 8200:8200
+    volumes:
+      - ./apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.7.1
+    restart: on-failure
+    container_name: kibana
+    environment:
+      - SERVER_NAME=localhost
+#      - ELASTICSEARCH_HOSTS=["http://localhost:9200"]
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200","http://elasticsearch4:9200"]
+#      - "SERVER_HOST=0"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 5601:5601
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - elasticsearch
+    depends_on:
+      - elasticsearch1
+      - elasticsearch2
+      - elasticsearch3
+      - elasticsearch4
+#      elasticsearch1:
+#        condition: service_healthy
+#      elasticsearch2:
+#        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  cerebro:
+    image: yannart/cerebro:latest
+    restart: on-failure
+    container_name: cerebro
+    environment:
+      - "node.name=cerebro"
+    ports:
+      - 9000:9000
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+  elastalert:
+    image: bitsensor/elastalert:latest
+    restart: on-failure
+    container_name: elastalert
+    ports:
+      - 3030:3030
+    environment:
+      - "node.name=elastalert"
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./elastalert/config/elastalert.yml:/opt/elastalert/config.yml
+      - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
+      - ./elastalert/rules:/opt/elastalert/rules
+      - ./elastalert/rule_templates:/opt/elastalert/rule_templates
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - elasticsearch1
+      - kibana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - "node.name=grafana"
+      - GF_SECURITY_ADMIN_PASSWORD=admin 
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,jdbranham-diagram-panel,pierosavi-imageit-panel
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+networks:
+  elasticsearch:
+    driver: bridge

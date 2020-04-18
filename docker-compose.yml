@@ -1,20 +1,11 @@
 version: '3.2'
 services:
   curator:
-    image: bitnami/elasticsearch-curator:5
+    image: build-curator:latest
     container_name: curator
     logging:
       driver: json-file
     restart: on-failure
-    environment:
-      ELASTICSEARCH_HOST: elasticsearch1
-      CRON: 0 * * * *
-#      CONFIG_FILE: /etc/curator/config.yml
-#      ACTION_FILE: /etc/curator/actions/allocate_and_delete.yml
-      UNIT_COUNT: 2
-    command: ["--config=/etc/curator/curator.yml", "/etc/curator/actions/allocate_and_delete.yml"]
-    volumes:
-      - "./:/etc/curator:ro"
     networks:
       - elasticsearch
     depends_on:
@@ -28,22 +19,18 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#      - ./elastic:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
     environment:
       - "cluster.name=es-cluster"
       - "node.name=master"
-#      - path.data=/var/lib/elasticsearch
-#      - path.log=/var/log/elasticsearch
       - "network.host=0.0.0.0"
       - "transport.host=0.0.0.0"
       - "node.master=true"
       - "node.data=false"
       - "bootstrap.memory_lock=true"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-#      - discovery.zen.minimum_master_nodes=1
     ulimits:
       nproc: 65535
       memlock:
@@ -65,8 +52,6 @@ services:
     environment:
       - "cluster.name=es-cluster"
       - "node.name=data-fast"
-#      - path.data=/var/lib/elasticsearch
-#      - path.log=/var/log/elasticsearch
       - "network.host=0.0.0.0"
       - "transport.host=0.0.0.0"
       - "node.master=false"
@@ -74,7 +59,6 @@ services:
       - "bootstrap.memory_lock=true"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.zen.ping.unicast.hosts=elasticsearch1"
-#      - discovery.zen.minimum_master_nodes=1
       - "node.attr.speed=fast"
     ulimits:
       nproc: 65535
@@ -84,7 +68,6 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#      - ./elastic:/usr/share/elasticsearch/data
     networks:
       - elasticsearch
     healthcheck:
@@ -101,8 +84,6 @@ services:
     environment:
       - "cluster.name=es-cluster"
       - "node.name=data-slow"
-#      - path.data=/var/lib/elasticsearch
-#      - path.log=/var/log/elasticsearch
       - "network.host=0.0.0.0"
       - "transport.host=0.0.0.0"
       - "node.master=false"
@@ -110,7 +91,6 @@ services:
       - "bootstrap.memory_lock=true"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.zen.ping.unicast.hosts=elasticsearch1"
-#      - discovery.zen.minimum_master_nodes=1
       - "node.attr.speed=slow"
     ulimits:
       nproc: 65535
@@ -120,7 +100,6 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#      - ./elastic:/usr/share/elasticsearch/data
     networks:
       - elasticsearch
     healthcheck:
@@ -137,8 +116,6 @@ services:
     environment:
       - "cluster.name=es-cluster"
       - "node.name=data-slow-2"
-#      - path.data=/var/lib/elasticsearch
-#      - path.log=/var/log/elasticsearch
       - "network.host=0.0.0.0"
       - "transport.host=0.0.0.0"
       - "node.master=false"
@@ -146,7 +123,6 @@ services:
       - "bootstrap.memory_lock=true"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.zen.ping.unicast.hosts=elasticsearch1"
-#      - discovery.zen.minimum_master_nodes=1
       - "node.attr.speed=slow"
     ulimits:
       nproc: 65535
@@ -156,7 +132,6 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#      - ./elastic:/usr/share/elasticsearch/data
     networks:
       - elasticsearch
     healthcheck:
@@ -229,9 +204,7 @@ services:
     container_name: kibana
     environment:
       - SERVER_NAME=localhost
-#      - ELASTICSEARCH_HOSTS=["http://localhost:9200"]
       - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200","http://elasticsearch4:9200"]
-#      - "SERVER_HOST=0"
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -249,10 +222,6 @@ services:
       - elasticsearch2
       - elasticsearch3
       - elasticsearch4
-#      elasticsearch1:
-#        condition: service_healthy
-#      elasticsearch2:
-#        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-s", "-f", "http://localhost:5601"]
       interval: 30s

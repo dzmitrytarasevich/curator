@@ -9,8 +9,8 @@ actions:
   1:
     action: allocation
     description: >-
-      Apply shard allocation routing to 'require' 'tag=slow' for hot/cold node
-      setup for test- indices older than 1 hour, based on index_creation
+      Apply shard allocation routing to 'require' 'tag=fast' for hot/cold node
+      setup for test- indices older than 1 minute, based on index_creation
       date
     options:
       key: tag
@@ -19,6 +19,7 @@ actions:
       wait_for_completion: False
       continue_if_exception: False
       disable_action: False
+      allow_ilm_indices: True
     filters:
     - filtertype: pattern
       kind: prefix
@@ -28,13 +29,13 @@ actions:
       source: creation_date
       direction: older
       unit: minutes
-      unit_count: 0
+      unit_count: 1
       exclude:
   2:
     action: allocation
     description: >-
       Apply shard allocation routing to 'require' 'tag=slow' for hot/cold node
-      setup for test- indices older than 1 hour, based on index_creation
+      setup for test- indices older than 10 minutes, based on index_creation
       date
     options:
       key: tag
@@ -43,6 +44,7 @@ actions:
       wait_for_completion: False
       continue_if_exception: False
       disable_action: False
+      allow_ilm_indices: True
     filters:
     - filtertype: pattern
       kind: prefix
@@ -57,7 +59,7 @@ actions:
   3:
     action: delete_indices
     description: >-
-      Delete indices older than 3 hours (based on index name), for test-
+      Delete indices older than 20 minutes (based on index name), for test-
       prefixed indices. Ignore the error if the filter does not result in an
       actionable list of indices (ignore_empty_list) and exit cleanly.
     options:
@@ -65,6 +67,7 @@ actions:
       timeout_override:
       continue_if_exception: False
       disable_action: False
+      allow_ilm_indices: True
     filters:
     - filtertype: pattern
       kind: prefix

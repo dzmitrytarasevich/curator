@@ -1,10 +1,16 @@
 FROM bitnami/elasticsearch-curator
+LABEL maintainer="Dmitriy Tarasevich <dmitritarasevich@mail.ru>"
+USER root
 
-RUN apt-get update && apt-get install -y cron
+COPY . /curator
+WORKDIR /curator
+RUN touch /curator/curator.log &&\
+    apt update &&\
+    apt install --no-install-recommends -y cron &&\ 
+    rm -rf /var/lib/apt/lists/* &&\
+    apt clean &&\
+    echo 'export LC_ALL="C.UTF-8"' >> /etc/default/locale &&\
+    echo 'export LANG="C.UTF-8"' &&\
+    sh /curator/bin/crontab.sh
 
-ADD . app
-WORKDIR app
-RUN npm install
-EXPOSE 3000
-
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["cron", "&&", "tail", "-f", "/curator/curator.log"]

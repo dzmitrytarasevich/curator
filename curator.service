@@ -1,6 +1,0 @@
-[Unit]
-Description=Curator service
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/curator --config /vagrant/elk\ in\ docker-compose/curator.yml /vagrant/elk\ in\ docker-compose/actions/allocate_and_delete.yml

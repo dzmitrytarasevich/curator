@@ -10,20 +10,11 @@ actions:
     action: create_index
     description: Create the index with date in name, with 5 shards and 1 replica.
     options:
-      name: '<index-{now/M}>'
+      name: 'index-%Y.%m.%d.%H.%M'
       extra_settings:
         settings:
           number_of_shards: 5
           number_of_replicas: 1
-#          routing:
-#            allocation:
-#              include:
-#                slow: False
-          cluster:
-            routing:
-              allocation:
-                awareness:
-                  attributes: speed
       timeout_override:
       continue_if_exception: False
       disable_action: False

@@ -139,6 +139,38 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+elasticsearch5:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: elasticsearch4
+    logging:
+      driver: json-file
+    restart: on-failure
+    environment:
+      - "cluster.name=es-cluster"
+      - "node.name=data-fast-2"
+      - "network.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "node.master=false"
+      - "node.data=true"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+      - "node.attr.speed=fast"
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   filebeat:
     image: docker.elastic.co/beats/filebeat:6.7.1
     user: root
@@ -219,9 +251,6 @@ services:
       - elasticsearch
     depends_on:
       - elasticsearch1
-      - elasticsearch2
-      - elasticsearch3
-      - elasticsearch4
     healthcheck:
       test: ["CMD", "curl", "-s", "-f", "http://localhost:5601"]
       interval: 30s

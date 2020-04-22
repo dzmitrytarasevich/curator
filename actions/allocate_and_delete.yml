@@ -10,7 +10,7 @@ actions:
     action: allocation
     description: >-
       Apply shard allocation routing to 'require' 'tag=fast' for hot/cold node
-      setup for test- indices younger than 4 minutes, based on index_creation
+      setup for test- indices younger than 2 minutes, based on index_creation
       date
     options:
       key: tag
@@ -29,13 +29,13 @@ actions:
       source: creation_date
       direction: younger
       unit: minutes
-      unit_count: 4
+      unit_count: 2
       exclude:
   2:
     action: allocation
     description: >-
       Apply shard allocation routing to 'require' 'tag=slow' for hot/cold node
-      setup for test- indices older than 9 minutes, based on index_creation
+      setup for test- indices older than 4 minutes, based on index_creation
       date
     options:
       key: tag
@@ -54,12 +54,12 @@ actions:
       source: creation_date
       direction: older
       unit: minutes
-      unit_count: 9
+      unit_count: 4
       exclude:
   3:
     action: delete_indices
     description: >-
-      Delete indices older than 20 minutes (based on index name), for test-
+      Delete indices older than 6 minutes (based on index name), for test-
       prefixed indices. Ignore the error if the filter does not result in an
       actionable list of indices (ignore_empty_list) and exit cleanly.
     options:
@@ -77,5 +77,5 @@ actions:
       source: creation_date
       direction: older
       unit: minutes
-      unit_count: 20
+      unit_count: 6 
       exclude:

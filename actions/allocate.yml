@@ -1,0 +1,58 @@
+---
+#Remember, leave a key empty if there is no value.  None will be a string,
+# not a Python "NoneType"
+#
+# Also remember that all examples have 'disable_action' set to True.  If you
+# want to use this action as a template, be sure to set this to False after
+# copying it.
+actions:
+  1:
+    action: allocation
+    description: >-
+      Apply shard allocation routing to 'require' 'tag=fast' for hot/cold node
+      setup for test- indices younger than 2 minutes, based on index_creation
+      date
+    options:
+      key: tag
+      value: fast
+      allocation_type: require
+      wait_for_completion: False
+      continue_if_exception: False
+      disable_action: False
+      allow_ilm_indices: True
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: test-
+      exclude:
+    - filtertype: age
+      source: creation_date
+      direction: younger
+      unit: minutes
+      unit_count: 2
+      exclude:
+  2:
+    action: allocation
+    description: >-
+      Apply shard allocation routing to 'require' 'tag=slow' for hot/cold node
+      setup for test- indices older than 4 minutes, based on index_creation
+      date
+    options:
+      key: tag
+      value: slow
+      allocation_type: require
+      wait_for_completion: False
+      continue_if_exception: False
+      disable_action: False
+      allow_ilm_indices: True
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: test-
+      exclude:
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: minutes
+      unit_count: 4
+      exclude:

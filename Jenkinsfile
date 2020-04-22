@@ -6,11 +6,6 @@ pipeline {
         sh 'sh bin/build-image.sh'
       }
     }
-    stage ('Clean docker') {
-      steps {
-        sh 'sh bin/clean-docker.sh'
-      }
-    }
     stage('Clean workspace') {
       steps {
         cleanWs()

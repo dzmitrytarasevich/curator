@@ -6,6 +6,7 @@ services:
     logging:
       driver: json-file
     restart: on-failure
+    cpus: 0.2
     networks:
       - elasticsearch
     depends_on:
@@ -36,6 +37,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    cpus: 1
     networks:
       - elasticsearch
     healthcheck:
@@ -68,6 +70,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    cpus: 0.5
     networks:
       - elasticsearch
     healthcheck:
@@ -100,6 +103,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    cpus: 0.5
     networks:
       - elasticsearch
     healthcheck:
@@ -132,6 +136,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    cpus: 0.5
     networks:
       - elasticsearch
     healthcheck:
@@ -164,6 +169,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    cpus: 0.5
     networks:
       - elasticsearch
     healthcheck:
@@ -171,72 +177,72 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:6.7.1
-    user: root
-    restart: on-failure
-    container_name: filebeat
-    environment:
-       - "node.name=filebeat"
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - elasticsearch
-    depends_on:
-      - kibana
-  metricbeat:
-    image: docker.elastic.co/beats/metricbeat:6.7.1
-    user: root
-    restart: on-failure
-    container_name: metricbeat
-    volumes:
-      - ./metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /proc:/hostfs/proc:ro
-      - /:/hostfs:ro
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - elasticsearch
-    depends_on:
-      - elasticsearch1
-      - kibana
-    environment:
-      - "node.name=metricbeat"
-      - "ELASTICSEARCH_URL=http://elasticsearch1:9200/"
-    command:
-      - "-system.hostfs=/hostfs"
-  apm-server:
-    image: docker.elastic.co/apm/apm-server:6.7.1
-    restart: on-failure
-    container_name: apm-server
-    networks:
-      - elasticsearch
-    environment:
-      - "node.name=apm-server"
-    depends_on:
-      - elasticsearch1
-      - kibana
-    ports:
-      - 8200:8200
-    volumes:
-      - ./apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+#  filebeat:
+      #    image: docker.elastic.co/beats/filebeat:6.7.1
+      #    user: root
+      #    restart: on-failure
+      #    container_name: filebeat
+      #    environment:
+      #       - "node.name=filebeat"
+      #    volumes:
+      #      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      #      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      #      - /var/run/docker.sock:/var/run/docker.sock
+      #      - /etc/timezone:/etc/timezone:ro
+      #      - /etc/localtime:/etc/localtime:ro
+      #    networks:
+      #      - elasticsearch
+      #    depends_on:
+      #      - kibana
+#  metricbeat:
+      #    image: docker.elastic.co/beats/metricbeat:6.7.1
+      #    user: root
+      #    restart: on-failure
+      #    container_name: metricbeat
+      #    volumes:
+      #      - ./metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      #      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      #      - /var/run/docker.sock:/var/run/docker.sock
+      #      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      #      - /proc:/hostfs/proc:ro
+      #      - /:/hostfs:ro
+      #      - /etc/timezone:/etc/timezone:ro
+      #      - /etc/localtime:/etc/localtime:ro
+      #    networks:
+      #      - elasticsearch
+      #    depends_on:
+      #      - elasticsearch1
+      #      - kibana
+      #    environment:
+      #      - "node.name=metricbeat"
+      #      - "ELASTICSEARCH_URL=http://elasticsearch1:9200/"
+      #    command:
+      #      - "-system.hostfs=/hostfs"
+#  apm-server:
+      #    image: docker.elastic.co/apm/apm-server:6.7.1
+      #    restart: on-failure
+      #    container_name: apm-server
+      #    networks:
+      #      - elasticsearch
+      #    environment:
+      #      - "node.name=apm-server"
+      #    depends_on:
+      #      - elasticsearch1
+      #      - kibana
+      #    ports:
+      #      - 8200:8200
+      #    volumes:
+      #      - ./apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+      #      - /var/run/docker.sock:/var/run/docker.sock
+      #      - /etc/timezone:/etc/timezone:ro
+      #      - /etc/localtime:/etc/localtime:ro
   kibana:
     image: docker.elastic.co/kibana/kibana:6.7.1
     restart: on-failure
     container_name: kibana
     environment:
       - SERVER_NAME=localhost
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200","http://elasticsearch4:9200"]
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200","http://elasticsearch4:9200","http://elasticsearch5:9200"]
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -271,44 +277,44 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
-  elastalert:
-    image: bitsensor/elastalert:latest
-    restart: on-failure
-    container_name: elastalert
-    ports:
-      - 3030:3030
-    environment:
-      - "node.name=elastalert"
-    networks:
-      - elasticsearch
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3030"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-    volumes:
-      - ./elastalert/config/elastalert.yml:/opt/elastalert/config.yml
-      - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
-      - ./elastalert/rules:/opt/elastalert/rules
-      - ./elastalert/rule_templates:/opt/elastalert/rule_templates
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      - elasticsearch1
-      - kibana
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    environment:
-      - "node.name=grafana"
-      - GF_SECURITY_ADMIN_PASSWORD=admin 
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel,jdbranham-diagram-panel,pierosavi-imageit-panel
-    ports:
-      - 3000:3000
-    volumes:
-      - ./grafana:/var/lib/grafana
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-networks:
+#  elastalert:
+#    image: bitsensor/elastalert:latest
+      #    restart: on-failure
+      #    container_name: elastalert
+      #    ports:
+      #      - 3030:3030
+      #    environment:
+      #      - "node.name=elastalert"
+      #    networks:
+      #      - elasticsearch
+      #    healthcheck:
+      #      test: ["CMD", "curl", "-f", "http://localhost:3030"]
+      #      interval: 1m30s
+      #      timeout: 10s
+      #      retries: 3
+      #    volumes:
+      #      - ./elastalert/config/elastalert.yml:/opt/elastalert/config.yml
+      #      - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
+      #      - ./elastalert/rules:/opt/elastalert/rules
+      #      - ./elastalert/rule_templates:/opt/elastalert/rule_templates
+      #      - /etc/timezone:/etc/timezone:ro
+      #      - /etc/localtime:/etc/localtime:ro
+      #    depends_on:
+      #      - elasticsearch1
+      #      - kibana
+#  grafana:
+      #    image: grafana/grafana
+      #    container_name: grafana
+      #    environment:
+      #      - "node.name=grafana"
+      #      - GF_SECURITY_ADMIN_PASSWORD=admin 
+      #      - GF_INSTALL_PLUGINS=grafana-piechart-panel,jdbranham-diagram-panel,pierosavi-imageit-panel
+      #    ports:
+      #      - 3000:3000
+      #    volumes:
+      #      - ./grafana:/var/lib/grafana
+      #      - /etc/timezone:/etc/timezone:ro
+      #      - /etc/localtime:/etc/localtime:ro
+      #networks:
   elasticsearch:
     driver: bridge

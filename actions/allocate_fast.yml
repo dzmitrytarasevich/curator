@@ -10,7 +10,7 @@ actions:
     action: allocation
     description: >-
       Apply shard allocation routing to 'require' attribute 'speed=fast' for hot/cold node
-      setup for index- indices older than 1 minute, based on index_creation
+      setup for index- indices younger than 2 minutes, based on index_creation
       date
     options:
       key: speed
@@ -27,7 +27,7 @@ actions:
       exclude:
     - filtertype: age
       source: creation_date
-      direction: older
+      direction: younger
       unit: minutes
-      unit_count: 1
+      unit_count: 2
       exclude:

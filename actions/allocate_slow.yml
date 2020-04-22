@@ -10,7 +10,7 @@ actions:
     action: allocation
     description: >-
       Apply shard allocation routing to 'require' attribute 'speed=slow' for hot/cold node
-      setup for test- indices older than 4 minutes, based on index_creation
+      setup for test- indices older than 2 minutes, based on index_creation
       date
     options:
       key: tag
@@ -29,5 +29,5 @@ actions:
       source: creation_date
       direction: older
       unit: minutes
-      unit_count: 4
+      unit_count: 2
       exclude:

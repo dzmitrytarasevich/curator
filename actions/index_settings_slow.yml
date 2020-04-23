@@ -9,9 +9,8 @@ actions:
   1:
     action: index_settings
     description: >-
-      Change attribute to 'speed=slow' for hot/cold node
-      setup for index- indices older than 2 minutes, based on index_creation
-      date
+      Change indices index- allocation to nodes with attribute 'speed=slow'
+      older than 2 minutes, based on index creation date
     options:
       index_settings:
         index:
@@ -27,8 +26,7 @@ actions:
       value: index-
       exclude:
     - filtertype: age
-      source: name
+      source: creation_date
       direction: older
-      timestring: '%Y.%m.%d.%H.%M'
       unit: minutes
       unit_count: 2
